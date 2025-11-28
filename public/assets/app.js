@@ -98,7 +98,7 @@ async function apiRequest(path, { method = 'GET', body, query, auth = true } = {
     if (body !== undefined) {
         headers['Content-Type'] = 'application/json';
         let payloadBody = body;
-        // add token redundantly into body for non-GET (dev compat only)
+        // add token redundantly into the body for non-GET
         if (AUTH_DEV_COMPAT && auth && state.token && typeof body === 'object' && body !== null && method.toUpperCase() !== 'GET' && !('token' in body)) {
             payloadBody = { ...body, token: state.token };
         }
@@ -126,13 +126,13 @@ async function apiRequest(path, { method = 'GET', body, query, auth = true } = {
                     state.token = newToken;
                     localStorage.setItem('blueSpokeToken', newToken);
                     document.cookie = `blue_spoke_token=${encodeURIComponent(newToken)}; Path=/; SameSite=Lax`;
-                    // rebuild payload with fresh token if needed
+                    // rebuild the payload with fresh token if needed
                     let retryPayload = payload;
                     if (body !== undefined && typeof body === 'object' && body !== null && method.toUpperCase() !== 'GET') {
                         const bodyObj = { ...body, token: newToken };
                         retryPayload = JSON.stringify(bodyObj);
                     }
-                    // retry original request once with updated token in headers; rebuild URL without old token query
+                    // retry original request once with updated token in headers; rebuild URL without an old token query
                     const retryHeaders = {};
                     retryHeaders['Authorization'] = `Bearer ${newToken}`;
                     retryHeaders['X-Auth-Token'] = newToken;
@@ -143,7 +143,7 @@ async function apiRequest(path, { method = 'GET', body, query, auth = true } = {
                     if (query && Object.keys(query).length) {
                         Object.entries(query).forEach(([k,v])=>{ if (k !== 'token' && v!==undefined && v!==null && v!=='') p.append(String(k), String(v)); });
                     }
-                    // add fresh token explicitly so servers that rely on query can auth (dev compat only)
+                    // add fresh token explicitly so servers that rely on a query can auth
                     if (AUTH_DEV_COMPAT) p.append('token', newToken);
                     const qs = p.toString();
                     if (qs) retryUrl += (retryUrl.includes('?') ? '&' : '?') + qs;
@@ -153,7 +153,7 @@ async function apiRequest(path, { method = 'GET', body, query, auth = true } = {
             }
         } catch { /* ignore */ }
         if (res.status === 401) {
-            // Do not auto-logout; surface error and keep session while we diagnose
+            // Do not auto-logout - Added for debugging purposes
             notify('Unauthorized (401). Please try again.', 'error');
             throw new Error('Unauthorized (401)');
         }
@@ -219,6 +219,19 @@ function ensureShell() {
                     <div class="brand">Blue Spoke</div>
                     <p class="muted">Service Console</p>
                 </div>
+                <div class="side-clock clock-control">
+                    <div class="user-chip small">
+                        <strong id="side-user-name">—</strong>
+                        <button type="button" id="side-user-toggle" class="btn-ghost" title="Show roster">▾</button>
+                    </div>
+                    <span id="side-clock-chip" class="badge status-bad" title="Click to clock in/out">OUT</span>
+                    <div id="side-clock-dropdown" class="clock-dropdown" hidden>
+                        <h4>On shift</h4>
+                        <ul id="side-roster-in"></ul>
+                        <h4>Off shift</h4>
+                        <ul id="side-roster-out"></ul>
+                    </div>
+                </div>
                 <nav>
                     <button data-view="overview" class="active"><span class="nav-icon">🏠</span> Overview</button>
                     <button data-view="customers"><span class="nav-icon">👤</span> Customers</button>
@@ -230,38 +243,8 @@ function ensureShell() {
                 <button id="logout-btn" class="btn-ghost">Sign out</button>
             </aside>
             <section class="main">
-                <header class="top-bar">
-                    <div class="top-brand">
-                        <span class="lightspeed-dot"></span>
-                        <div>
-                            <strong>Shop Register</strong>
-                            <p class="muted">POS Console</p>
-                        </div>
-                    </div>
-                    <div class="top-actions">
-                        <button class="btn-secondary" id="refresh-all" type="button">Sync Data</button>
-                        <div class="user-chip">
-                            <div>
-                                <strong id="user-name"></strong>
-                                <div id="user-email" class="muted"></div>
-                            </div>
-                            <span class="badge role" id="user-role"></span>
-                        </div>
-                    </div>
-                </header>
                 <div class="content">
                     <section id="view-overview" class="view active">
-                        <div class="hero">
-                            <div>
-                                <p class="muted">Daily briefing</p>
-                                <h1 id="hero-greeting">Let's get rolling</h1>
-                                <p>Monitor today's workload, roster status, and keep the service queue moving.</p>
-                            </div>
-                            <div class="hero-actions">
-                                <button type="button" class="btn-primary hero-jump" data-clock="in">Clock In</button>
-                                <button type="button" class="btn-secondary hero-jump" data-clock="out">Clock Out</button>
-                            </div>
-                        </div>
                         <div class="module-grid">
                             <button class="module-tile" data-jump="#inventory-search">
                                 <span class="tile-icon">🔍</span>
@@ -294,54 +277,8 @@ function ensureShell() {
                                 <span>Search and edit riders</span>
                             </button>
                         </div>
-                        <div class="grid two">
-                            <article class="card clock-card" id="timeclock-panel">
-                                <h2>Time Clock</h2>
-                                <p class="muted">Crew members clock in/out with their 4-digit code.</p>
-                                <form id="clock-form" class="grid two" autocomplete="off">
-                                    <label>Employee code
-                                        <input name="code" type="password" inputmode="numeric" maxlength="4" placeholder="1234" required>
-                                    </label>
-                                    <label>Note
-                                        <input name="note" placeholder="Opening duties, deliveries…">
-                                    </label>
-                                    <div class="form-actions full">
-                                        <button type="submit" class="btn-primary" data-action="in">Clock In</button>
-                                        <button type="submit" class="btn-secondary" data-action="out">Clock Out</button>
-                                    </div>
-                                </form>
-                            </article>
-                            <article class="card">
-                                <h2>Shop Snapshot</h2>
-                                <div id="stats-card"></div>
-                            </article>
-                        </div>
-                        <article class="card">
-                            <div class="card-header">
-                                <h2>Floor Status</h2>
-                                <p class="muted">Who is on the floor right now and for how long.</p>
-                            </div>
-                            <div class="table-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Employee</th>
-                                            <th>Role</th>
-                                            <th>Status</th>
-                                            <th>Since</th>
-                                            <th>Duration</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="clock-status-body">
-                                        <tr><td colspan="5">Loading roster…</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </article>
-                        <article class="card" id="next-slot-card">
-                            <h2>Next Available Slot</h2>
-                            <p class="muted">Use the scheduling tab to refine filters.</p>
-                        </article>
+                        
+                        
                     </section>
 
                     <section id="view-customers" class="view">
@@ -610,7 +547,7 @@ function ensureShell() {
                                                     <label>Brand<input name="bike_brand"></label>
                                                     <label>Model<input name="bike_model"></label>
                                                     <label>Year<input name="bike_year" type="number"></label>
-                                                    <label>Description<input name="bike_notes" placeholder="Bike description / notes"></label>
+                                                    <label>Description<input name="bike_notes"></label>
                                                     <label>Color<input name="bike_color"></label>
                                                     <label>Size<input name="bike_size"></label>
                                                     <label>Serial<input name="bike_serial"></label>
@@ -618,7 +555,7 @@ function ensureShell() {
                                             </section>
                                             <section class="wo-panel">
                                                 <header class="wo-panel-header"><h3>Internal Note</h3></header>
-                                                <textarea name="internal_notes" rows="3" placeholder="Internal note test"></textarea>
+                                                <textarea name="internal_notes" rows="3" placeholder="Internal note"></textarea>
                                             </section>
                                             <section class="wo-panel">
                                                 <header class="wo-panel-header">
@@ -761,7 +698,7 @@ function ensureShell() {
                                                     <label>Brand<input name="bike_brand" id="woe-bike_brand"></label>
                                                     <label>Model<input name="bike_model" id="woe-bike_model"></label>
                                                     <label>Year<input name="bike_year" id="woe-bike_year" type="number"></label>
-                                                    <label>Description<input name="bike_notes" id="woe-bike_notes" placeholder="Bike description / notes"></label>
+                                                    <label>Description<input name="bike_notes" id="woe-bike_notes"></label>
                                                     <label>Color<input name="bike_color" id="woe-bike_color"></label>
                                                     <label>Size<input name="bike_size" id="woe-bike_size"></label>
                                                     <label>Serial<input name="bike_serial" id="woe-bike_serial"></label>
@@ -957,12 +894,16 @@ function ensureShell() {
 
     dom.navButtons = root.querySelectorAll('.sidebar button[data-view]');
     dom.heroGreeting = document.getElementById('hero-greeting');
-    dom.heroJumpButtons = root.querySelectorAll('.hero-jump');
     dom.logout = document.getElementById('logout-btn');
     dom.refresh = document.getElementById('refresh-all');
     dom.userName = document.getElementById('user-name');
     dom.userEmail = document.getElementById('user-email');
     dom.userRole = document.getElementById('user-role');
+    dom.sideClockChip = document.getElementById('side-clock-chip');
+    dom.sideClockDropdown = document.getElementById('side-clock-dropdown');
+    dom.sideRosterIn = document.getElementById('side-roster-in');
+    dom.sideRosterOut = document.getElementById('side-roster-out');
+    dom.sideUserToggle = document.getElementById('side-user-toggle');
     dom.views = root.querySelectorAll('.view');
     dom.clockForm = document.getElementById('clock-form');
 
@@ -970,7 +911,15 @@ function ensureShell() {
         btn.addEventListener('click', () => setActiveView(btn.dataset.view));
     });
     dom.logout.addEventListener('click', () => handleLogout());
-    dom.refresh.addEventListener('click', () => { void refreshEverything(); });
+    if (dom.refresh) dom.refresh.addEventListener('click', () => { void refreshEverything(); });
+    if (dom.sideClockChip) dom.sideClockChip.addEventListener('click', () => promptClockToggle());
+    if (dom.sideUserToggle) dom.sideUserToggle.addEventListener('click', () => {
+        if (dom.sideClockDropdown) dom.sideClockDropdown.hidden = !dom.sideClockDropdown.hidden;
+    });
+    document.addEventListener('click', (e) => {
+        const within = e.target.closest?.('.side-clock');
+        if (!within && dom.sideClockDropdown) dom.sideClockDropdown.hidden = true;
+    });
 
     root.querySelector('#customers-search-form').addEventListener('submit', handleCustomerSearch);
     root.querySelector('#customers-reset').addEventListener('click', async () => {
@@ -1010,14 +959,6 @@ function ensureShell() {
     root.querySelector('#warranty-register-form').addEventListener('submit', handleWarrantyRegister);
     root.querySelector('#warranty-template-form').addEventListener('submit', handleTemplateCreate);
     if (dom.clockForm) dom.clockForm.addEventListener('submit', handleClockForm);
-    dom.heroJumpButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (!dom.clockForm) return;
-            dom.clockForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            const codeInput = dom.clockForm.elements.code;
-            if (codeInput) codeInput.focus();
-        });
-    });
     registerSectionNav();
     registerModuleTiles();
 
@@ -1186,7 +1127,7 @@ function ensureShell() {
         });
     }
 
-    // disable Create until customer chosen
+    // disable Create until customer is chosen
     updateCreateBtnState();
 
     state.shellReady = true;
@@ -1218,10 +1159,13 @@ function updateUserInfo() {
         email = '',
         role = '',
     } = state.user;
-    dom.userName.textContent = fullName;
-    dom.userEmail.textContent = email;
-    dom.userRole.textContent = role;
+    if (dom.userName) dom.userName.textContent = fullName;
+    const sideUser = document.getElementById('side-user-name');
+    if (sideUser) sideUser.textContent = fullName;
+    if (dom.userEmail) dom.userEmail.textContent = email;
+    if (dom.userRole) dom.userRole.textContent = role;
     if (dom.heroGreeting) dom.heroGreeting.textContent = `Welcome back, ${fullName.split(' ')[0] || fullName}`;
+    updateTopClockStatus();
 }
 
 async function refreshEverything() {
@@ -1233,6 +1177,7 @@ async function refreshEverything() {
         loadTimeClockStatus(),
     ]);
     renderCalendar();
+    updateTopClockStatus();
 }
 
 async function loadCustomers() {
@@ -1744,8 +1689,60 @@ async function handleClockForm(evt) {
         notify(`Clock ${action === 'in' ? 'in' : 'out'} recorded`, 'success');
         form.reset();
         await loadTimeClockStatus();
+        updateTopClockStatus();
     } catch (err) {
         notify(err.message, 'error');
+    }
+}
+
+// Quick clock toggle via badge prompt
+async function promptClockToggle() {
+    const code = prompt('Enter your 4-digit employee code');
+    if (!code) return;
+    if (!/^\d{4}$/.test(code.trim())) { notify('Enter a valid 4-digit code', 'error'); return; }
+    const pin = code.trim();
+    try {
+        // Try to clock out first; if not clocked in, attempt to clock in
+        try {
+            await apiRequest('/time-clock/clock-out', { method: 'POST', body: { code: pin } });
+            notify('Clocked out', 'success');
+        } catch (e) {
+            // If 409 not clocked in, try to clock in
+            await apiRequest('/time-clock/clock-in', { method: 'POST', body: { code: pin } });
+            notify('Clocked in', 'success');
+        }
+        await loadTimeClockStatus();
+        updateTopClockStatus();
+    } catch (err) {
+        notify(err.message || 'Clock action failed', 'error');
+    }
+}
+
+function updateTopClockStatus() {
+    const chip = document.getElementById('side-clock-chip');
+    const dd = document.getElementById('side-clock-dropdown');
+    const inList = document.getElementById('side-roster-in');
+    const outList = document.getElementById('side-roster-out');
+    if (!chip) return;
+    const me = state.user || {};
+    const self = (state.timeClockStatus || []).find(p => Number(p.id) === Number(me.id));
+    const isIn = self ? Boolean(self.is_clocked_in) : false;
+    chip.textContent = isIn ? 'IN' : 'OUT';
+    chip.classList.toggle('status-ok', isIn);
+    chip.classList.toggle('status-bad', !isIn);
+    // Roster dropdown
+    if (inList && outList) {
+        const on = (state.timeClockStatus || []).filter(p => p.is_clocked_in);
+        const off = (state.timeClockStatus || []).filter(p => !p.is_clocked_in);
+        inList.innerHTML = on.length ? on.map(p => {
+            const dur = typeof p.minutes_active === 'number' ? formatMinutes(p.minutes_active) : '—';
+            const role = p.role || '';
+            return `<li class="roster-item"><span class="roster-dot in"></span><span>${p.full_name}</span><span class="roster-role">${role}</span><span class="roster-duration">${dur}</span></li>`;
+        }).join('') : '<li class="muted">—</li>';
+        outList.innerHTML = off.length ? off.map(p => {
+            const role = p.role || '';
+            return `<li class="roster-item"><span class="roster-dot out"></span><span>${p.full_name}</span><span class="roster-role">${role}</span></li>`;
+        }).join('') : '<li class="muted">—</li>';
     }
 }
 
@@ -1808,7 +1805,7 @@ async function handleWorkOrderFilter(evt) {
     const fd = new FormData(evt.target);
     state.workOrderQuery.status = fd.get('status');
     state.workOrderQuery.page = fd.get('page') || 1;
-    await loadWorkOrders();
+        await loadWorkOrders();
 }
 
 async function handleWorkOrderCreate(evt) {
@@ -2013,13 +2010,15 @@ async function handleNextSlot(evt) {
         }
         state.nextSlot = slot;
         const card = document.getElementById('next-slot-card');
-        const startLabel = slot.start_at ? new Date(String(slot.start_at)).toLocaleString() : '—';
-        const endLabel = slot.end_at ? new Date(String(slot.end_at)).toLocaleString() : '—';
-        card.innerHTML = `
-            <h2>Next Available Slot</h2>
-            <p><strong>${startLabel}</strong> → ${endLabel}</p>
-            <p class="muted">Adjust filters in the scheduling tab.</p>
-        `;
+        if (card) {
+            const startLabel = slot.start_at ? new Date(String(slot.start_at)).toLocaleString() : '—';
+            const endLabel = slot.end_at ? new Date(String(slot.end_at)).toLocaleString() : '—';
+            card.innerHTML = `
+                <h2>Next Available Slot</h2>
+                <p><strong>${startLabel}</strong> → ${endLabel}</p>
+                <p class="muted">Adjust filters in the scheduling tab.</p>
+            `;
+        }
         notify('Slot located', 'success');
     } catch (err) {
         notify(err.message, 'error');
@@ -2407,6 +2406,8 @@ document.addEventListener('click', (evt) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); if (id==='add-part-q') void searchParts(); else if (id==='add-service-q') void searchServices(); else if (id==='add-part-q-edit') void searchPartsEdit(); else void searchServicesEdit(); } });
 });
+
+// Workorder implementations have been moved to workorders.js
 
 function updateCreateBtnState() {
     const btn = document.querySelector('#workorder-create .wo-summary-card button[type="submit"]');
