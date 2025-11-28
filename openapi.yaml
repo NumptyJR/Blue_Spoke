@@ -1,0 +1,432 @@
+openapi: 3.1.0
+info:
+  title: Blue Spoke API
+  version: 1.0.0
+  description: |
+    PHP API made for bicycle shops.
+servers:
+  - url: http://127.0.0.1:8080
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string, format: email }
+        full_name: { type: string }
+        role: { type: string, enum: [owner, manager, sales, mechanic] }
+        is_active: { type: boolean }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+    TokenResponse:
+      type: object
+      properties:
+        token: { type: string }
+        exp: { type: integer, description: UNIX seconds }
+        user: { $ref: '#/components/schemas/User' }
+    Customer:
+      type: object
+      properties:
+        id: { type: integer }
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        street: { type: string }
+        city: { type: string }
+        region: { type: string }
+        postal_code: { type: string }
+        country: { type: string }
+        notes: { type: string }
+    InventoryItem:
+      type: object
+      properties:
+        id: { type: integer }
+        sku: { type: string }
+        name: { type: string }
+        brand: { type: string }
+        category: { type: string }
+        price: { type: number, format: float }
+        reorder_level: { type: integer }
+    WorkOrderCreateRequest:
+      type: object
+      required: [customer_id]
+      properties:
+        status: { type: string, enum: [draft, open, in_progress, paused, awaiting_parts, completed, delivered, cancelled] }
+        customer_id: { type: integer }
+        bike_id: { type: integer, nullable: true }
+        assigned_to: { type: integer, nullable: true }
+        promised_at: { type: string, format: date-time, nullable: true }
+        location_id: { type: integer, nullable: true }
+        notes: { type: string, nullable: true }
+        services:
+          type: array
+          items:
+            type: object
+            properties:
+              service_id: { type: integer, nullable: true }
+              service_code: { type: string, nullable: true }
+              quantity: { type: integer, default: 1 }
+              assigned_to: { type: integer, nullable: true }
+              notes: { type: string, nullable: true }
+        bike:
+          type: object
+          nullable: true
+          properties:
+            brand: { type: string }
+            model: { type: string }
+            model_year: { type: integer }
+            serial_number: { type: string }
+            color: { type: string }
+            wheel_size: { type: string }
+            drivetrain: { type: string }
+            notes: { type: string }
+    WorkOrderTotals:
+      type: object
+      properties:
+        labor_subtotal: { type: number }
+        parts_subtotal: { type: number }
+        total: { type: number }
+    WorkOrderBundle:
+      type: object
+      properties:
+        work_order:
+          type: object
+        services:
+          type: array
+          items: { type: object }
+        parts:
+          type: array
+          items: { type: object }
+        totals:
+          $ref: '#/components/schemas/WorkOrderTotals'
+    PartsAddRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            required: [item_id]
+            properties:
+              item_id: { type: integer }
+              quantity: { type: integer, default: 1 }
+              notes: { type: string, nullable: true }
+    AppointmentCreateRequest:
+      type: object
+      required: [start_at, end_at]
+      properties:
+        start_at: { type: string, format: date-time }
+        end_at: { type: string, format: date-time }
+        assigned_to: { type: integer, nullable: true }
+        location_id: { type: integer, nullable: true }
+        bay_id: { type: integer, nullable: true }
+        status: { type: string, enum: [scheduled, confirmed, in_service, done, no_show, cancelled] }
+        notes: { type: string, nullable: true }
+    NextSlotResponse:
+      type: object
+      properties:
+        start_at: { type: string, format: date-time }
+        end_at: { type: string, format: date-time }
+    WarrantyTemplateCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        brand_id: { type: integer, nullable: true }
+        item_id: { type: integer, nullable: true }
+        duration_months: { type: integer, default: 12 }
+        terms: { type: string, nullable: true }
+    CustomerWarrantyRegisterRequest:
+      type: object
+      required: [warranty_id]
+      properties:
+        bike_id: { type: integer, nullable: true }
+        inventory_item_id: { type: integer, nullable: true }
+        serial_number: { type: string, nullable: true }
+        warranty_id: { type: integer }
+        status: { type: string, enum: [active, expired, void, transferred], default: active }
+        purchase_date: { type: string, format: date }
+        start_date: { type: string, format: date }
+        duration_months: { type: integer, nullable: true }
+        notes: { type: string, nullable: true }
+    StatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Customers
+  - name: Inventory
+  - name: WorkOrders
+  - name: Schedule
+  - name: TimeClock
+  - name: Warranties
+paths:
+  /health:
+    get:
+      tags: [Misc]
+      summary: Health check
+      responses:
+        '200': { description: OK }
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login (internal users only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      security: []
+      responses:
+        '200':
+          description: Token issued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+        '401': { description: Invalid credentials, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh token
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } } }
+        '401': { description: Invalid token }
+  /me:
+    get:
+      tags: [Auth]
+      summary: Current user
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: object, properties: { user: { $ref: '#/components/schemas/User' } } } } } }
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Create user (owner/manager only)
+      responses:
+        '201': { description: Created }
+        '403': { description: Forbidden }
+  /customers:
+    post:
+      tags: [Customers]
+      summary: Create customer
+      responses:
+        '201': { description: Created }
+  /customers/{id}:
+    get:
+      tags: [Customers]
+      summary: Get customer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Customer' } } } }
+        '404': { description: Not found }
+  /inventory/items:
+    get:
+      tags: [Inventory]
+      summary: List inventory items
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: brand
+          schema: { type: string }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: size
+          schema: { type: integer, default: 50 }
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Inventory]
+      summary: Create item (manager/owner)
+      responses:
+        '201': { description: Created }
+        '403': { description: Forbidden }
+  /work-orders:
+    post:
+      tags: [WorkOrders]
+      summary: Create work order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/WorkOrderCreateRequest' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { type: object, properties: { id: { type: integer } } } } } }
+  /work-orders/{id}:
+    get:
+      tags: [WorkOrders]
+      summary: Get work order (with lines & totals)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/WorkOrderBundle' } } } }
+        '404': { description: Not found }
+  /work-orders/{id}/parts:
+    post:
+      tags: [WorkOrders]
+      summary: Add parts lines (consumes stock)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PartsAddRequest' }
+      responses:
+        '200': { description: OK }
+  /work-orders/{id}/appointments:
+    post:
+      tags: [Schedule]
+      summary: Create appointment (overlap-protected)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AppointmentCreateRequest' }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { type: object, properties: { id: { type: integer } } } } } }
+        '409': { description: Overlap or invalid slot }
+  /work-orders/{id}/next-slot:
+    get:
+      tags: [Schedule]
+      summary: Next available slot for this work order (uses labor minutes)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: from
+          schema: { type: string, format: date-time }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/NextSlotResponse' } } } }
+        '404': { description: No slot }
+  /schedule/next-slot:
+    get:
+      tags: [Schedule]
+      summary: Next available slot (explicit mechanic/location/duration)
+      parameters:
+        - in: query
+          name: mechanic_id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: location_id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: duration_minutes
+          schema: { type: integer, default: 60 }
+        - in: query
+          name: from
+          schema: { type: string, format: date-time }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/NextSlotResponse' } } } }
+        '404': { description: No slot }
+  /schedule/mechanic:
+    get:
+      tags: [Schedule]
+      summary: Mechanic day view
+      parameters:
+        - in: query
+          name: mechanic_id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: day
+          schema: { type: string, format: date }
+      responses:
+        '200': { description: OK }
+  /time-clock/clock-in:
+    post:
+      tags: [TimeClock]
+      summary: Clock in
+      responses:
+        '201': { description: Created }
+        '409': { description: Already clocked in }
+  /time-clock/clock-out:
+    post:
+      tags: [TimeClock]
+      summary: Clock out
+      responses:
+        '200': { description: OK }
+        '409': { description: No open clock-in }
+  /work-orders/{id}/status:
+    patch:
+      tags: [WorkOrders]
+      summary: Update status (guarded transitions)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StatusUpdateRequest' }
+      responses:
+        '200': { description: OK }
+        '409': { description: Illegal transition }
+  /warranties:
+    post:
+      tags: [Warranties]
+      summary: Create warranty template (owner/manager)
+      responses:
+        '201': { description: Created }
+  /customers/{id}/warranties:
+    get:
+      tags: [Warranties]
+      summary: List customer warranties
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Warranties]
+      summary: Register a warranty instance for a customer
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomerWarrantyRegisterRequest' }
+      responses:
+        '201': { description: Created }
+  /auth/set-password:
+    post:
+      tags: [ Auth ]
+      summary: Set a user password (owner/manager)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ user_id, new_password ]
+              properties:
+                user_id: { type: integer }
+                new_password: { type: string, format: password }
+      responses:
+        '200': { description: OK }
+        '422': { description: Validation error }
+        '404': { description: Not found }
