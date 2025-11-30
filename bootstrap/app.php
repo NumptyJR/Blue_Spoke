@@ -1,6 +1,7 @@
 <?php
 use App\Router;
-use App\Controllers\{AuthController,
+use App\Controllers\{
+    AuthController,
     CustomerController,
     InventoryController,
     TimeClockController,
@@ -8,7 +9,8 @@ use App\Controllers\{AuthController,
     WorkOrderController,
     ScheduleController,
     UsersController,
-    ServicesController};
+    ServicesController
+};
 use App\Middleware\{Auth, RequireRole};
 
 //Public
@@ -28,12 +30,15 @@ Router::group([Auth::class], function () {
     // Customers
     Router::post('/customers', [RequireRole::class, 'only:owner,manager,sales,mechanic'], [CustomerController::class, 'create']);
     Router::get('/customers/{id}', [CustomerController::class, 'get']);
+    Router::patch('/customers/{id}', [RequireRole::class, 'only:owner,manager,sales,mechanic'], [CustomerController::class, 'update']);
     Router::get('/customers', [CustomerController::class, 'list']);
     Router::get('/customers/{id}/bikes', [CustomerController::class, 'listBikes']);
 
     // Inventory
     Router::get('/inventory/items', [InventoryController::class, 'list']);
+    Router::get('/inventory/brands', [InventoryController::class, 'listBrands']);
     Router::post('/inventory/items', [RequireRole::class, 'only:owner,manager'], [InventoryController::class, 'create']);
+    Router::patch('/inventory/items/{id}', [RequireRole::class, 'only:owner,manager'], [InventoryController::class, 'update']);
 
     // Work Orders
     Router::post('/work-orders', [WorkOrderController::class, 'create']);
@@ -42,6 +47,8 @@ Router::group([Auth::class], function () {
     Router::post('/work-orders/{id}/services', [WorkOrderController::class, 'addServices']);
     Router::delete('/work-orders/{id}/parts/{lineId}', [WorkOrderController::class, 'deletePart']);
     Router::delete('/work-orders/{id}/services/{lineId}', [WorkOrderController::class, 'deleteService']);
+    Router::patch('/work-orders/{id}/parts/{lineId}', [WorkOrderController::class, 'updatePartLine']);
+    Router::patch('/work-orders/{id}/services/{lineId}', [WorkOrderController::class, 'updateServiceLine']);
     Router::patch('/work-orders/{id}/status', [WorkOrderController::class, 'updateStatus']);
     Router::patch('/work-orders/{id}', [WorkOrderController::class, 'update']);
     Router::get('/work-orders', [WorkOrderController::class, 'list']);
