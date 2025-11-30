@@ -58,6 +58,25 @@ export function ensureShell() {
                 </div>
             </section>
         </div>
+
+        <!-- Clock PIN Modal -->
+        <div class="modal" id="clock-pin-modal" hidden>
+            <div class="modal-card" style="max-width: 320px;">
+                <div class="modal-header">
+                    <strong>Employee Code</strong>
+                    <button type="button" class="btn-ghost" id="clock-pin-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form id="clock-pin-form">
+                        <p class="muted" style="margin-top:0;">Enter your 4-digit code to clock in or out.</p>
+                        <input type="password" name="pin" id="clock-pin-input" placeholder="0000" maxlength="4" style="font-size: 1.5rem; letter-spacing: 0.5em; text-align: center;" required>
+                        <div class="form-actions full" style="margin-top: 1rem;">
+                            <button class="btn-primary" type="submit" style="width:100%">Confirm</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     `;
 
 
@@ -71,11 +90,15 @@ export function ensureShell() {
     });
 
     // Clock listeners
-    document.getElementById('side-clock-chip').addEventListener('click', promptClockToggle);
+    document.getElementById('side-clock-chip').addEventListener('click', openClockModal);
     document.getElementById('side-user-toggle').addEventListener('click', () => {
         const dd = document.getElementById('side-clock-dropdown');
         dd.hidden = !dd.hidden;
     });
+
+    // Clock Modal Listeners
+    document.getElementById('clock-pin-close').addEventListener('click', closeClockModal);
+    document.getElementById('clock-pin-form').addEventListener('submit', handleClockPinSubmit);
 
     state.shellReady = true;
     loadTimeClockStatus();
@@ -102,11 +125,27 @@ export async function loadTimeClockStatus() {
     }
 }
 
-async function promptClockToggle() {
-    const code = prompt('Enter your 4-digit employee code');
+function openClockModal() {
+    const modal = document.getElementById('clock-pin-modal');
+    const input = document.getElementById('clock-pin-input');
+    modal.hidden = false;
+    input.value = '';
+    setTimeout(() => input.focus(), 100);
+}
+
+function closeClockModal() {
+    document.getElementById('clock-pin-modal').hidden = true;
+}
+
+async function handleClockPinSubmit(e) {
+    e.preventDefault();
+    const input = document.getElementById('clock-pin-input');
+    const code = input.value;
+
     if (!code) return;
     if (!/^\d{4}$/.test(code.trim())) { notify('Enter a valid 4-digit code', 'error'); return; }
     const pin = code.trim();
+
     try {
         // Try to clock out first; if not clocked in, attempt to clock in
         try {
@@ -117,6 +156,7 @@ async function promptClockToggle() {
             await apiRequest('/time-clock/clock-in', { method: 'POST', body: { code: pin } });
             notify('Clocked in', 'success');
         }
+        closeClockModal();
         await loadTimeClockStatus();
     } catch (err) {
         notify(err.message || 'Clock action failed', 'error');

@@ -2,7 +2,7 @@
     color-scheme: light;
     font-family: "Inter", "Roboto", "Segoe UI", system-ui, sans-serif;
 
-    /* Professional Light Theme Palette */
+    /* Light Theme */
     --bg: #f8fafc;
     /* Slate 50 */
     --fg: #0f172a;
@@ -90,6 +90,10 @@ body {
     min-height: 100vh;
     background: var(--bg);
     color: var(--fg);
+}
+
+[hidden] {
+    display: none !important;
 }
 
 .app-root {
@@ -664,7 +668,7 @@ form.two-col {
     }
 }
 
-/* --- Work Order Modern UI --- */
+/* --- Work Order UI --- */
 
 .workorder-shell {
     background: transparent;
@@ -1556,7 +1560,7 @@ form.two-col {
     }
 }
 
-/* --- Enhanced Work Order UI --- */
+/* --- Work Order UI --- */
 
 /* Toolbar Layout */
 .addline-toolbar {
@@ -1671,7 +1675,7 @@ form.two-col {
     border-color: rgba(239, 68, 68, 0.2);
 }
 
-/* Input Styles Fix */
+/* Input Styles */
 .wo-qty {
     width: 60px;
     padding: 0.25rem 0.5rem;
@@ -1739,7 +1743,7 @@ form.two-col {
     color: var(--brand);
 }
 
-/* Work Order List Redesign */
+/* Work Order List */
 .wo-toolbar {
     display: flex;
     gap: 1rem;
@@ -1774,7 +1778,7 @@ form.two-col {
     letter-spacing: 0.05em;
 }
 
-/* Compact Rows Override */
+/* Compact Rows */
 .wo-rich-row td {
     padding: 0.5rem 1rem;
     /* Reduced padding */
@@ -1795,7 +1799,7 @@ form.two-col {
     font-size: 0.75rem;
 }
 
-/* Dashboard Redesign */
+/* Dashboard */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -1995,4 +1999,50 @@ form.two-col {
 .badge-stock-out {
     background: #fef2f2;
     color: #b91c1c;
+}
+/* Search Dropdown */
+.search-container {
+    position: relative;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    box-shadow: var(--tile-shadow);
+    z-index: 50;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 4px;
+}
+
+.search-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.search-item:last-child {
+    border-bottom: none;
+}
+
+.search-item:hover {
+    background: var(--surface-muted);
+}
+
+.search-item strong {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--fg);
+}
+
+.search-item small {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
 }

@@ -486,12 +486,10 @@ function renderWorkOrders() {
 
             let empName = '—';
             let initials = '—';
-            if (assignedTo && state.employees) {
-                const emp = state.employees.find(e => e.id === assignedTo);
-                if (emp) {
-                    empName = emp.full_name;
-                    initials = empName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                }
+            if (assignedTo) {
+                // API returns the full name directly
+                empName = assignedTo;
+                initials = empName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             }
 
             const safeStatus = status?.replace(' ', '_') ?? 'open';
@@ -559,7 +557,11 @@ async function handleWorkOrderCreate(evt) {
         return;
     }
 
-    const services = (state.woStaged?.services || []).map(s => ({ service_code: s.code, quantity: Number(s.quantity || 1) }));
+    const services = (state.woStaged?.services || []).map(s => ({
+        service_id: s.id,
+        service_code: s.code,
+        quantity: Number(s.quantity || 1)
+    }));
     const uiStatus = fd.get('status') || 'open';
     const statusMap = {
         waiting: 'open', open: 'open', finished: 'completed', cancelled: 'cancelled',

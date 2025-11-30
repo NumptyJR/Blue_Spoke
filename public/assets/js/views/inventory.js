@@ -267,10 +267,10 @@ function renderInventoryDetail(container, item) {
             <label>Name<input name="name" value="${name}" required></label>
             <label>Brand (ID)<input name="brand_id" type="number" value="${item.brand_id || ''}"></label>
             <label>Category (ID)<input name="category_id" type="number" value="${item.category_id || ''}"></label>
-            <label>Price<input name="price" type="number" step="0.01" value="${price}"></label>
-            <label>Cost<input name="cost" type="number" step="0.01" value="${cost}"></label>
-            <label>Stock<input name="stock_quantity" type="number" value="${stock_quantity}"></label>
-            <label>Reorder Level<input name="reorder_level" type="number" value="${reorder_level}"></label>
+            <label>Price<input name="price" type="number" step="0.01" value="${price ?? ''}"></label>
+            <label>Cost<input name="cost" type="number" step="0.01" value="${cost ?? ''}"></label>
+            <label>Stock<input name="stock_quantity" type="number" value="${stock_quantity ?? ''}"></label>
+            <label>Reorder Level<input name="reorder_level" type="number" value="${reorder_level ?? ''}"></label>
             <div class="form-actions full">
                 <button class="btn-primary" type="submit">Save Changes</button>
                 <button class="btn-ghost" type="button" id="inv-edit-cancel">Cancel</button>

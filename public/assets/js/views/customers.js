@@ -235,13 +235,13 @@ async function renderCustomerDetail(container, customer) {
             <input type="hidden" name="id" value="${id}">
             <label>First Name<input name="first_name" value="${firstName}" required></label>
             <label>Last Name<input name="last_name" value="${lastName}" required></label>
-            <label>Email<input name="email" type="email" value="${email}"></label>
-            <label>Phone<input name="phone" type="tel" value="${phone}"></label>
-            <label>Street<input name="street" value="${street}"></label>
-            <label>City<input name="city" value="${city}"></label>
-            <label>Region<input name="region" value="${region}"></label>
-            <label>Zip<input name="postal_code" value="${zip}"></label>
-            <label class="full">Notes<textarea name="notes" rows="3">${notes}</textarea></label>
+            <label>Email<input name="email" type="email" value="${email || ''}"></label>
+            <label>Phone<input name="phone" type="tel" value="${phone || ''}"></label>
+            <label>Street<input name="street" value="${street || ''}"></label>
+            <label>City<input name="city" value="${city || ''}"></label>
+            <label>Region<input name="region" value="${region || ''}"></label>
+            <label>Zip<input name="postal_code" value="${zip || ''}"></label>
+            <label class="full">Notes<textarea name="notes" rows="3">${notes || ''}</textarea></label>
             <div class="form-actions full">
                 <button class="btn-primary" type="submit">Save Changes</button>
                 <button class="btn-ghost" type="button" id="customer-edit-cancel">Cancel</button>
@@ -279,9 +279,9 @@ async function renderCustomerDetail(container, customer) {
             const idx = state.customers.findIndex(c => c.id === id);
             if (idx !== -1) state.customers[idx] = updated;
 
-            // Re-render
+            // Re-render list and close modal
             renderCustomerTable();
-            renderCustomerDetail(container, updated);
+            document.getElementById('customer-detail-modal').hidden = true;
         } catch (err) {
             notify(err.message, 'error');
         }

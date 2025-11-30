@@ -68,6 +68,9 @@ Router::group([Auth::class], function () {
     Router::post('/warranties', [RequireRole::class, 'only:owner,manager'], [WarrantyController::class, 'createTemplate']);
     Router::post('/customers/{id}/warranties', [WarrantyController::class, 'registerForCustomer']);
     Router::get('/customers/{id}/warranties', [WarrantyController::class, 'listForCustomer']);
+    Router::get('/warranties', [WarrantyController::class, 'list']);
+    Router::get('/warranties/templates', [WarrantyController::class, 'listTemplates']);
+    Router::patch('/warranties/{id}', [WarrantyController::class, 'update']);
 
     // Users
     Router::get('/users', [UsersController::class, 'list']);
