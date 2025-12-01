@@ -37,6 +37,7 @@ Router::group([Auth::class], function () {
     // Inventory
     Router::get('/inventory/items', [InventoryController::class, 'list']);
     Router::get('/inventory/brands', [InventoryController::class, 'listBrands']);
+    Router::get('/inventory/categories', [InventoryController::class, 'listCategories']);
     Router::post('/inventory/items', [RequireRole::class, 'only:owner,manager'], [InventoryController::class, 'create']);
     Router::patch('/inventory/items/{id}', [RequireRole::class, 'only:owner,manager'], [InventoryController::class, 'update']);
 

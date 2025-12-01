@@ -149,4 +149,10 @@ final class InventoryController
         $stmt = Database::pdo()->query('SELECT id, name FROM brands ORDER BY name');
         return ['items' => $stmt->fetchAll()];
     }
+
+    public function listCategories(Request $req): array
+    {
+        $stmt = Database::pdo()->query('SELECT id, name FROM categories ORDER BY name');
+        return ['items' => $stmt->fetchAll()];
+    }
 }

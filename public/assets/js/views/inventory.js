@@ -265,8 +265,16 @@ function renderInventoryDetail(container, item) {
             <input type="hidden" name="id" value="${id}">
             <label>SKU<input name="sku" value="${sku}" required></label>
             <label>Name<input name="name" value="${name}" required></label>
-            <label>Brand (ID)<input name="brand_id" type="number" value="${item.brand_id || ''}"></label>
-            <label>Category (ID)<input name="category_id" type="number" value="${item.category_id || ''}"></label>
+            <label>Brand
+                <select name="brand_id" id="inv-edit-brand">
+                    <option value="">Select Brand...</option>
+                </select>
+            </label>
+            <label>Category
+                <select name="category_id" id="inv-edit-category">
+                    <option value="">Select Category...</option>
+                </select>
+            </label>
             <label>Price<input name="price" type="number" step="0.01" value="${price ?? ''}"></label>
             <label>Cost<input name="cost" type="number" step="0.01" value="${cost ?? ''}"></label>
             <label>Stock<input name="stock_quantity" type="number" value="${stock_quantity ?? ''}"></label>
@@ -279,7 +287,25 @@ function renderInventoryDetail(container, item) {
     `;
 
     // Edit Listeners
-    document.getElementById('inv-edit-btn').addEventListener('click', () => {
+    document.getElementById('inv-edit-btn').addEventListener('click', async () => {
+        // Load options
+        try {
+            const [bRes, cRes] = await Promise.all([
+                apiRequest('/inventory/brands'),
+                apiRequest('/inventory/categories')
+            ]);
+
+            const brandSel = document.getElementById('inv-edit-brand');
+            const catSel = document.getElementById('inv-edit-category');
+
+            brandSel.innerHTML = '<option value="">Select Brand...</option>' +
+                (bRes.items || []).map(b => `<option value="${b.id}" ${b.id == item.brand_id ? 'selected' : ''}>${b.name}</option>`).join('');
+
+            catSel.innerHTML = '<option value="">Select Category...</option>' +
+                (cRes.items || []).map(c => `<option value="${c.id}" ${c.id == item.category_id ? 'selected' : ''}>${c.name}</option>`).join('');
+
+        } catch (e) { console.error('Failed to load options', e); }
+
         document.getElementById('inv-view-mode').hidden = true;
         document.getElementById('inv-edit-btn').hidden = true;
         document.getElementById('inv-edit-form').hidden = false;
