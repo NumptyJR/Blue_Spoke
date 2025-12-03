@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: UserRepository.php
+// Description: User repository
+
 namespace App\Repositories;
 
 use App\Database;

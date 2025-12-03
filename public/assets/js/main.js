@@ -1,3 +1,8 @@
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: main.js
+// Description: Main entry point
+
 import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { ensureShell, updateUserInfo, handleLogout } from './views/shell.js';

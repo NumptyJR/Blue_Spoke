@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: CustomerController.php
+// Description: Customer controller
+
 namespace App\Controllers;
 use App\Http\Request;
 use App\Database;

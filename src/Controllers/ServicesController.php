@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: ServicesController.php
+// Description: Services controller
+
 namespace App\Controllers;
 use App\Http\Request;
 use App\Database;
@@ -8,7 +13,7 @@ final class ServicesController
     public function list(Request $req): array
     {
         $pdo = Database::pdo();
-        $q = trim((string)($req->query['q'] ?? ''));
+        $q = trim((string) ($req->query['q'] ?? ''));
         $sql = 'SELECT id, code, name, default_minutes, default_price FROM services_catalog';
         $p = [];
         if ($q !== '') {

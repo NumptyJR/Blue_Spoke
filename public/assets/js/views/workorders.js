@@ -1,3 +1,8 @@
+// Author: Joshua Schaff 
+// Email: joshuarschaff@gmail.com
+// File: workorders.js
+// Description: Work order management view
+
 import { apiRequest } from '../api.js';
 import { state } from '../state.js';
 import { notify, formatMinutes } from '../utils.js';

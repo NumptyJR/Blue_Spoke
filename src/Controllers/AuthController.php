@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: AuthController.php
+// Description: Authentication controller
+
 namespace App\Controllers;
 
 use App\Http\Request;

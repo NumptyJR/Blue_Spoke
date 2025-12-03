@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: Database.php
+// Description: Database class
+
 namespace App;
 use PDO;
 use RuntimeException;

@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: Response.php
+// Description: Response class
+
 namespace App\Http;
 
 final class Response
@@ -16,7 +21,8 @@ final class Response
         echo $json;
     }
 
-    public static function error(string $msg, int $status = 400): void {
+    public static function error(string $msg, int $status = 400): void
+    {
         self::json(['error' => $msg], $status);
     }
 }

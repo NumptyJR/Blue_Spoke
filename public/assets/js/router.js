@@ -1,3 +1,8 @@
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: router.js
+// Description: Router
+
 import { state } from './state.js';
 
 export function setActiveView(view) {

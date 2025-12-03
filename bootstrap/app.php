@@ -1,4 +1,7 @@
 <?php
+//Author: Joshua Schaff
+//email: joshuarschaff@gmail.com
+//Description: This file is the entry point for the application. It is responsible for loading the application and its dependencies.
 use App\Router;
 use App\Controllers\{
     AuthController,

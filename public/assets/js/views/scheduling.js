@@ -1,3 +1,8 @@
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: scheduling.js
+// Description: Scheduling view
+
 import { apiRequest } from '../api.js';
 import { state } from '../state.js';
 import { notify } from '../utils.js';

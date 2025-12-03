@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: ScheduleController.php
+// Description: Schedule controller
+
 namespace App\Controllers;
 use App\Http\Request;
 use App\Database;
@@ -10,47 +15,51 @@ final class ScheduleController
 {
     public function create(Request $req, $woId): array
     {
-        $b = $req->body; $pdo = Database::pdo();
+        $b = $req->body;
+        $pdo = Database::pdo();
         $st = $pdo->prepare('INSERT INTO work_order_appointments (work_order_id, start_at, end_at, assigned_to, location_id, status, notes)
             VALUES (:wo,:start_at,:end_at,:assigned_to,:location_id,:status,:notes) RETURNING id');
         try {
             $st->execute([
-                ':wo'=>(int)$woId,
-                ':start_at'=>$b['start_at'], ':end_at'=>$b['end_at'],
-                ':assigned_to'=>$b['assigned_to'] ?? null,
-                ':location_id'=>$b['location_id'] ?? null,
-                ':status'=>$b['status'] ?? 'scheduled',
-                ':notes'=>$b['notes'] ?? null,
+                ':wo' => (int) $woId,
+                ':start_at' => $b['start_at'],
+                ':end_at' => $b['end_at'],
+                ':assigned_to' => $b['assigned_to'] ?? null,
+                ':location_id' => $b['location_id'] ?? null,
+                ':status' => $b['status'] ?? 'scheduled',
+                ':notes' => $b['notes'] ?? null,
             ]);
         } catch (PDOException $e) {
             $errorInfo = $st->errorInfo();
             $sqlState = $errorInfo[0] ?? $e->getCode();
-            if ($sqlState === '23P01' || $sqlState === '23505') return [['error'=>'Overlapping appointment'], 409];
+            if ($sqlState === '23P01' || $sqlState === '23505')
+                return [['error' => 'Overlapping appointment'], 409];
             throw $e;
         }
-        return ['id' => (int)$st->fetchColumn()];
+        return ['id' => (int) $st->fetchColumn()];
     }
 
     public function nextSlot(Request $req): array
     {
         $q = $req->query;
-        $mechanic   = (int)($q['mechanic_id'] ?? 0) ?: null;
-        $location   = (int)($q['location_id'] ?? 0) ?: null;
-        $duration   = max(15, (int)($q['duration_minutes'] ?? 60));
-        $fromParam  = $q['from'] ?? null;
-        $from       = $fromParam ? new DateTimeImmutable($fromParam) : new DateTimeImmutable();
+        $mechanic = (int) ($q['mechanic_id'] ?? 0) ?: null;
+        $location = (int) ($q['location_id'] ?? 0) ?: null;
+        $duration = max(15, (int) ($q['duration_minutes'] ?? 60));
+        $fromParam = $q['from'] ?? null;
+        $from = $fromParam ? new DateTimeImmutable($fromParam) : new DateTimeImmutable();
 
         try {
             $sql = "SELECT start_at, end_at FROM bike_shop.find_next_slot(:mech, :loc, :dur, COALESCE(:from, now()))";
-            $st  = Database::pdo()->prepare($sql);
+            $st = Database::pdo()->prepare($sql);
             $st->execute([
                 ':mech' => $mechanic,
-                ':loc'  => $location,
-                ':dur'  => $duration,
+                ':loc' => $location,
+                ':dur' => $duration,
                 ':from' => $fromParam,
             ]);
             $row = $st->fetch();
-            if ($row) return $row;
+            if ($row)
+                return $row;
         } catch (Throwable $e) {
             // fall through to simple heuristic fallback
         }
@@ -62,11 +71,12 @@ final class ScheduleController
     {
         $fromParam = $req->query['from'] ?? null;
         try {
-            $sql  = "SELECT start_at, end_at FROM bike_shop.find_next_slot_for_wo(:wo, COALESCE(:from, now()))";
-            $st   = Database::pdo()->prepare($sql);
-            $st->execute([':wo' => (int)$woId, ':from' => $fromParam]);
+            $sql = "SELECT start_at, end_at FROM bike_shop.find_next_slot_for_wo(:wo, COALESCE(:from, now()))";
+            $st = Database::pdo()->prepare($sql);
+            $st->execute([':wo' => (int) $woId, ':from' => $fromParam]);
             $row = $st->fetch();
-            if ($row) return $row;
+            if ($row)
+                return $row;
         } catch (Throwable $e) {
             // fallback handled below
         }
@@ -75,10 +85,11 @@ final class ScheduleController
 
     public function mechanicDay(Request $req): array
     {
-        $mechanicId = (int)($req->query['mechanic_id'] ?? 0);
-        $day        = $req->query['day'] ?? (new DateTimeImmutable('today'))->format('Y-m-d');
+        $mechanicId = (int) ($req->query['mechanic_id'] ?? 0);
+        $day = $req->query['day'] ?? (new DateTimeImmutable('today'))->format('Y-m-d');
 
-        if ($mechanicId <= 0) return [['error' => 'mechanic_id required'], 422];
+        if ($mechanicId <= 0)
+            return [['error' => 'mechanic_id required'], 422];
         try {
             $sql = "SELECT * FROM bike_shop.v_mechanic_day_schedule
                     WHERE mechanic = (SELECT full_name FROM bike_shop.users WHERE id = :uid)

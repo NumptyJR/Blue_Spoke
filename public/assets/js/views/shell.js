@@ -1,3 +1,8 @@
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: shell.js
+// Description: Shell view
+
 import { state } from '../state.js';
 import { renderLogin } from './login.js';
 import { notify, formatMinutes } from '../utils.js';

@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: WarrantyController.php
+// Description: Warranty controller
+
 namespace App\Controllers;
 use App\Http\Request;
 use App\Database;

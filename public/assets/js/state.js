@@ -1,3 +1,8 @@
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: state.js
+// Description: State management
+
 import { normalizeToken, readCookie } from './utils.js';
 
 export const state = {

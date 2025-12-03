@@ -1,4 +1,8 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: index.php
+// Description: Entry point
 declare(strict_types=1);
 
 use App\Router;

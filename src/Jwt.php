@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: Jwt.php
+// Description: Jwt class
+
 declare(strict_types=1);
 
 namespace App;
@@ -15,19 +20,19 @@ final class Jwt
         $exp = $now + ($ttlHours * 3600);
 
         $payload = $claims + [
-                'iat' => $now,
-                'exp' => $exp,
-            ];
+            'iat' => $now,
+            'exp' => $exp,
+        ];
 
         $secret = Config::env('JWT_SECRET', 'change-this-in-production');
-        $token  = FirebaseJWT::encode($payload, $secret, 'HS256');
+        $token = FirebaseJWT::encode($payload, $secret, 'HS256');
 
         return [$token, $exp];
     }
 
     public static function verify(string $token): array
     {
-        $secret  = Config::env('JWT_SECRET', 'change-this-in-production');
+        $secret = Config::env('JWT_SECRET', 'change-this-in-production');
         $decoded = FirebaseJWT::decode($token, new Key($secret, 'HS256'));
 
         // Convert stdClass -> array (deep)

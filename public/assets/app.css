@@ -1,3 +1,8 @@
+/* Author: Joshua Schaff
+ * Email: joshuarschaff@gmail.com
+ * File: app.css
+ * Description: Application styles */
+
 :root {
     color-scheme: light;
     font-family: "Inter", "Roboto", "Segoe UI", system-ui, sans-serif;
@@ -2000,6 +2005,7 @@ form.two-col {
     background: #fef2f2;
     color: #b91c1c;
 }
+
 /* Search Dropdown */
 .search-container {
     position: relative;

@@ -1,3 +1,8 @@
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: api.js
+// Description: API request handler
+
 import { state, AUTH_DEV_COMPAT } from './state.js';
 import { normalizeToken, notify } from './utils.js';
 

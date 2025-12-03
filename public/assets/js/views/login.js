@@ -1,3 +1,8 @@
+// Author: Joshua Schaff 
+// Email: joshuarschaff@gmail.com
+// File: login.js
+// Description: Login view
+
 import { apiRequest } from '../api.js';
 import { state } from '../state.js';
 import { normalizeToken, notify } from '../utils.js';

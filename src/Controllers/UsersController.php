@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: UsersController.php
+// Description: Users controller
+
 namespace App\Controllers;
 
 use App\Http\Request;
@@ -12,7 +17,10 @@ final class UsersController
         $role = $req->query['role'] ?? null;
         $sql = 'SELECT id, full_name, role FROM users WHERE is_active = TRUE';
         $p = [];
-        if ($role) { $sql .= ' AND role = ?'; $p[] = $role; }
+        if ($role) {
+            $sql .= ' AND role = ?';
+            $p[] = $role;
+        }
         $sql .= ' ORDER BY full_name';
         $st = $pdo->prepare($sql);
         $st->execute($p);

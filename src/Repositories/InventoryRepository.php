@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: InventoryRepository.php
+// Description: Inventory repository
+
 namespace App\Repositories;
 
 use App\Database;

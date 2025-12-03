@@ -1,3 +1,8 @@
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: overview.js
+// Description: Overview view
+
 import { setActiveView } from '../router.js';
 import { state } from '../state.js';
 

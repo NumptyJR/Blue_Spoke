@@ -1,4 +1,9 @@
 <?php
+// Author: Joshua Schaff
+// Email: joshuarschaff@gmail.com
+// File: Request.php
+// Description: Request class
+
 namespace App\Http;
 
 final class Request
@@ -13,7 +18,7 @@ final class Request
     public function __construct()
     {
         $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $this->path   = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+        $this->path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
         $this->headers = function_exists('getallheaders') ? (getallheaders() ?: []) : [];
         $this->query = $_GET ?? [];
         $raw = file_get_contents('php://input') ?: '';

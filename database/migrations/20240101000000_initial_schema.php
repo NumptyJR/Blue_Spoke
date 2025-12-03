@@ -1,4 +1,7 @@
 <?php
+//Author: Joshua Schaff
+//email: joshuarschaff@gmail.com
+//Description: This file creates the initial schema for the bike shop database.
 declare(strict_types=1);
 
 use Phinx\Migration\AbstractMigration;
