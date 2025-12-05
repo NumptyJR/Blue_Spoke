@@ -35,7 +35,7 @@ final class Jwt
         $secret = Config::env('JWT_SECRET', 'change-this-in-production');
         $decoded = FirebaseJWT::decode($token, new Key($secret, 'HS256'));
 
-        // Convert stdClass -> array (deep)
+        // Convert stdClass -> array
         return json_decode(json_encode($decoded, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
     }
 }

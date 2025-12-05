@@ -84,7 +84,7 @@ export async function apiRequest(path, { method = 'GET', body, query, auth = tru
             }
         } catch { /* ignore */ }
         if (res.status === 401) {
-            // Do not auto-logout - Added for debugging purposes
+            // Do not auto-logout
             notify('Unauthorized (401). Please try again.', 'error');
             throw new Error('Unauthorized (401)');
         }

@@ -419,10 +419,7 @@ function updateStatusVisuals(status, prefix) {
 
     const safeStatus = (status || 'open').toString();
     label.textContent = safeStatus.toUpperCase().replace('_', ' ');
-    // Reset classes
     rail.className = 'wo-status-column';
-    // Add status class (assuming css has .status-open etc, or we rely on the column background)
-    // Let's add a data attribute for styling
     rail.dataset.status = safeStatus;
 }
 
@@ -463,7 +460,7 @@ function renderWorkOrders() {
     const groups = {};
     sorted.forEach(wo => {
         const d = new Date(wo.opened_at);
-        const key = d.toDateString(); // e.g. "Fri Nov 29 2024"
+        const key = d.toDateString();
         if (!groups[key]) groups[key] = [];
         groups[key].push(wo);
     });
@@ -499,7 +496,7 @@ function renderWorkOrders() {
 
             const safeStatus = status?.replace(' ', '_') ?? 'open';
 
-            // Relative time for the cell (still useful even with headers)
+            // Relative time for the cell
             let timeAgo = '—';
             if (openedAt) {
                 const diff = Date.now() - new Date(openedAt).getTime();
@@ -687,7 +684,7 @@ function updateWorkOrderEstimate() {
     const labor = services.reduce((sum, s) => sum + Number(s.price || 0) * Number(s.quantity || 1), 0);
     const partsTotal = parts.reduce((sum, p) => sum + Number(p.price || 0) * Number(p.quantity || 1), 0);
 
-    // Tax (8% default)
+    // Tax
     const tax = (labor + partsTotal) * 0.08;
     const total = labor + partsTotal + tax;
 
@@ -884,7 +881,7 @@ function handleBikeSelect(bikeId, prefix) {
     const f = document.getElementById(prefix === 'wo' ? 'workorder-create-form' : 'workorder-edit-form');
     if (!f) return;
 
-    // Mapping: form_field_name -> bike_property
+    // Mapping
     const map = {
         'bike_brand': 'brand',
         'bike_model': 'model',
@@ -914,11 +911,8 @@ async function loadWorkOrderDetail(id) {
         f.elements.status.value = wo.status;
         f.elements.customer_id.value = wo.customer_id;
         f.elements.assigned_to.value = wo.assigned_to || '';
-        // Format date for datetime-local (YYYY-MM-DDTHH:MM)
         if (wo.promised_at) {
             const d = new Date(wo.promised_at);
-            // Adjust for timezone offset to keep local time or just slice if string is already local-ish
-            // Assuming API returns UTC or server time string. Let's use a safe local format.
             const localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
             f.elements.promised_at.value = localIso;
         } else {
