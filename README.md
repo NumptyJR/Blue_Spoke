@@ -1,6 +1,6 @@
 # Blue Spoke
 
-**Blue Spoke** is a modern, service-first Point of Sale (POS) and management system designed specifically for bicycle shops. 
+**Blue Spoke** is a modern, service-first Point of Sale (POS) and management system designed specifically for bike shops. 
 
 ## Key Features
 
