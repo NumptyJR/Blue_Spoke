@@ -15,7 +15,7 @@ Welcome to **Blue Spoke**, your shop's service management system. This guide wil
 ## Getting Started
 
 ### Logging In
-Access the application at your shop's URL. Enter your **Email** and **Password** to sign in.
+Access the application at your shop's URL. **Email** me at joshuarschaff@gmail.com to get your account set up. Enter your **Email** and **Password** to sign in.
 
 ### Navigation
 The sidebar on the left is your main command center.
@@ -68,11 +68,10 @@ You can create a new customer directly from the **Customers** tab or while creat
 ### Searching
 Use the search bar in the **Inventory** tab to find parts. You can see:
 - **Stock Levels**: Green badge = In Stock, Red badge = Low/Out of Stock.
-- **Bin Location**: Where to find the item in the shop.
 - **Pricing**: Retail price and cost.
 
 ### Editing Items
-Click "View" on an item to see details. Click "Edit Item" to update stock quantities, pricing, or bin locations.
+Click "View" on an item to see details. Click "Edit Item" to update stock quantities or pricing.
 
 ---
 
