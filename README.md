@@ -4,31 +4,31 @@
 
 ## Key Features
 
-### 🛠️ Service-First Workflows
+### Service-First Workflows
 - **Work Orders**: Create, track, and manage service tickets with a "Rich List" interface.
 - **Staging**: Add parts and labor to tickets with real-time inventory search.
 - **Status Tracking**: Visual status pipelines (Open, In Progress, Awaiting Parts, Finished).
 - **Tech Assignment**: Assign specific technicians to tickets.
 
-### 🚲 Asset Management
+### Asset Management
 - **Customer Bikes**: Track bikes as distinct assets with Brand, Model, Serial Number, and Color.
 - **Service History**: View past work orders for any specific bike.
 
-### 🛡️ Warranty Management
+### Warranty Management
 - **Active Tracking**: Dedicated tab for tracking active warranties.
 - **Templates**: Quickly register warranties using predefined templates (e.g., "Frame Lifetime", "1 Year Tune-up").
 - **Status Chips**: Instantly see if a warranty is Active, Expired, or Void.
 
-### 👥 Customer Relationship
+### Customer Relationship
 - **Rich Profiles**: Store contact info, bike details, and active warranties in one place.
 - **Quick Search**: Find customers by name, email, or phone instantly.
 
-### 📦 Inventory Control
+### Inventory Control
 - **Real-time Search**: Fast search for parts and services.
 - **Stock Levels**: Visual indicators for low stock.
 - **Service Catalog**: Manage labor codes and pricing.
 
-### ⏱️ Integrated Time Clock
+### Integrated Time Clock
 - **Seamless Clock-In**: Built-in sidebar widget for employees to clock in/out.
 - **PIN Security**: Secure 4-digit PIN entry via a custom modal.
 - **Roster**: See who is currently on shift at a glance.
